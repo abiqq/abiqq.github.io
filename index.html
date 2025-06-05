@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Clone</title>
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Top App Bar -->
+  <header class="mdc-top-app-bar">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <span class="mdc-top-app-bar__title">YouTube Clone</span>
+      </section>
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-middle">
+        <div class="mdc-text-field mdc-text-field--outlined search-bar">
+          <input type="text" id="search-input" class="mdc-text-field__input" placeholder="Search videos">
+          <div class="mdc-notched-outline">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch"></div>
+            <div class="mdc-notched-outline__trailing"></div>
+          </div>
+        </div>
+        <button class="mdc-button mdc-button--raised" id="search-button">
+          <span class="mdc-button__label">Search</span>
+        </button>
+      </section>
+    </div>
+  </header>
+
+  <!-- Video Grid -->
+  <main class="video-grid">
+    <div id="video-container"></div>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
