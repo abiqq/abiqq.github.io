@@ -4,22 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Watch Video</title>
+  <!-- Google Fonts Roboto -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- Material Components Web -->
   <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
   <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- CSS utama -->
+  <link rel="stylesheet" href="css/style.css">
   <style>
     .video-player {
       max-width: 1280px;
       margin: 16px auto;
       display: flex;
       gap: 16px;
+      flex-wrap: wrap;
     }
     .main-video {
-      flex: 3;
+      flex: 3 1 400px;
+      min-width: 320px;
     }
     .related-videos {
-      flex: 1;
+      flex: 1 1 250px;
+      min-width: 250px;
       max-width: 300px;
     }
     .video-iframe {
@@ -27,12 +34,21 @@
       aspect-ratio: 16/9;
       border: none;
       border-radius: 8px;
+      background: #000;
     }
     .video-details {
       padding: 16px 0;
     }
     .comments-section {
       margin-top: 16px;
+    }
+    @media (max-width: 900px) {
+      .video-player {
+        flex-direction: column;
+      }
+      .related-videos {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
