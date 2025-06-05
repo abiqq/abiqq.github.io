@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyArjDxw1aswD5efWgRAWmvYxBxwz7_MjF8'; // Replace with your YouTube API key
+const API_KEY = 'AIzaSyArjDxw1aswD5efWgRAWmvYxBxwz7_MjF8'; // Ganti dengan API Key YouTube milik Anda
 const videoContainer = document.getElementById('video-container');
 const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
@@ -14,6 +14,7 @@ async function fetchVideos(query = 'trending') {
     }
   } catch (error) {
     console.error('Error fetching videos:', error);
+    videoContainer.innerHTML = `<div style="color:red;text-align:center;">Failed to fetch videos.</div>`;
   }
 }
 
@@ -32,12 +33,12 @@ function displayVideos(videos) {
     const videoElement = document.createElement('div');
     videoElement.className = 'video-card';
     videoElement.innerHTML = `
-      <a href="watch.html?v=${video.id.videoId}">
+      <a href="watch.html?v=${video.id.videoId}" style="text-decoration:none;color:inherit;">
         <img src="${video.snippet.thumbnails.medium.url}" alt="${video.snippet.title}">
         <div class="video-card-content">
           <h3 class="video-title">${video.snippet.title}</h3>
           <p class="video-meta">${video.snippet.channelTitle}</p>
-          <p class="video-meta">${formatViews(stats.viewCount)} views • ${formatLikes(stats.likeCount)} likes</p>
+          <p class="video-meta">${formatViews(stats.viewCount)} views · ${formatLikes(stats.likeCount)} likes</p>
         </div>
       </a>
     `;
@@ -65,6 +66,13 @@ function formatLikes(likes) {
 searchButton.addEventListener('click', () => {
   const query = searchInput.value.trim();
   if (query) fetchVideos(query);
+});
+
+// Enter juga bisa untuk search
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    searchButton.click();
+  }
 });
 
 // Initialize with trending videos
