@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch Video</title>
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .video-player {
+      max-width: 1280px;
+      margin: 16px auto;
+      display: flex;
+      gap: 16px;
+    }
+    .main-video {
+      flex: 3;
+    }
+    .related-videos {
+      flex: 1;
+      max-width: 300px;
+    }
+    .video-iframe {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: none;
+      border-radius: 8px;
+    }
+    .video-details {
+      padding: 16px 0;
+    }
+    .comments-section {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header class="mdc-top-app-bar">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <a href="index.html" class="mdc-top-app-bar__title">YouTube Clone</a>
+      </section>
+    </div>
+  </header>
+
+  <main class="video-player">
+    <div class="main-video">
+      <iframe class="video-iframe" id="player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <div class="video-details">
+        <h1 id="video-title"></h1>
+        <p id="video-meta"></p>
+        <p id="video-description"></p>
+      </div>
+      <div class="comments-section">
+        <h3>Comments</h3>
+        <div id="comments-container"></div>
+      </div>
+    </div>
+    <div class="related-videos" id="related-videos"></div>
+  </main>
+
+  <script src="js/watch.js"></script>
+</body>
+</html>
