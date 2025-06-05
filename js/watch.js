@@ -1,4 +1,4 @@
-const API_KEY = 'YOUR_API_KEY'; // Replace with your YouTube API key
+const API_KEY = 'AIzaSyArjDxw1aswD5efWgRAWmvYxBxwz7_MjF8'; // Replace with your YouTube API key
 const player = document.getElementById('player');
 const videoTitle = document.getElementById('video-title');
 const videoMeta = document.getElementById('video-meta');
