@@ -3,200 +3,441 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Watch Video</title>
+  <title>YouTube Clone - Watch</title>
   <!-- Google Fonts Roboto -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
   <!-- Material Components Web -->
   <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
   <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Google API Client Library -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
-    .video-main {
+    :root {
+      --primary: #ff0000;
+      --surface: #fff;
+      --surface-glass: rgba(255,255,255,0.82);
+      --on-surface: #1c1b1f;
+      --shadow: rgba(103,80,164,0.10);
+      --border-radius: 20px;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(120deg, #f3e7e9 0%, #e3eeff 100%);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .mdc-top-app-bar {
+      background: var(--surface-glass);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+      backdrop-filter: blur(7px) saturate(1.2);
+      border-bottom: 1.5px solid #e1e1e1;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s;
+    }
+    .ytc-header-content {
       display: flex;
-      flex-direction: row;
-      gap: 36px;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 24px;
+      padding: 12px 32px;
+    }
+    .ytc-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      text-shadow: 0 2px 6px rgba(255,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      user-select: none;
+    }
+    .ytc-brand::before {
+      content: '';
+      display: inline-block;
+      width: 34px;
+      height: 24px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg') no-repeat center/contain;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+    .ytc-search-group {
+      display: flex;
+      align-items: center;
+      flex: 1 1 350px;
+      max-width: 600px;
+      min-width: 0;
+      background: var(--surface);
+      border-radius: 30px;
+      box-shadow: 0 2px 12px var(--shadow);
+      padding: 4px 8px 4px 16px;
+      border: 1.5px solid #ececec;
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+    .ytc-search-group:focus-within {
+      box-shadow: 0 4px 18px var(--primary, #ff0000, 0.15);
+      border: 1.5px solid var(--primary);
+    }
+    .ytc-search-input {
+      border: none;
+      outline: none;
+      font-size: 1.09rem;
+      background: transparent;
+      padding: 10px 8px 10px 2px;
+      width: 100%;
+      color: var(--on-surface);
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .ytc-search-btn {
+      border: none;
+      outline: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 18px;
+      font-size: 1rem;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      padding: 8px 22px 8px 18px;
+      margin-left: 6px;
+      cursor: pointer;
+      box-shadow: 0 1px 8px rgba(255,0,0,0.10);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.18s, transform 0.12s;
+    }
+    .ytc-search-btn:hover, .ytc-search-btn:focus {
+      background: #e60000;
+      transform: translateY(-2px) scale(1.03);
+    }
+    .ytc-search-icon {
+      font-size: 1.22rem;
+      opacity: 0.85;
+      margin-right: 2px;
+    }
+    main.container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 88px 16px 32px 16px;
-      box-sizing: border-box;
+      padding: 32px 16px 0 16px;
     }
-    .main-video {
-      flex: 2;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .video-frame {
+    .video-player-container {
       width: 100%;
       aspect-ratio: 16/9;
-      background: #111;
-      border: none;
-      border-radius: 18px;
-      box-shadow: 0 4px 18px rgba(103,80,164,0.15);
+      background: #000;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
     }
     .video-details {
-      background: var(--surface-container, #ece6f0);
-      border-radius: 18px;
-      padding: 18px 20px 12px 20px;
-      box-shadow: 0 2px 8px var(--shadow, rgba(103,80,164,0.08));
-      margin-bottom: 8px;
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      box-shadow: 0 2px 18px rgba(30,30,60,0.07);
+      border: 1.5px solid #f1f1f1;
+      margin-bottom: 16px;
     }
     .video-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--primary, #6750a4);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #222;
       margin: 0 0 8px 0;
-      line-height: 1.3;
     }
     .video-meta {
-      color: #625b71;
-      font-size: 1.02rem;
-      margin-bottom: 6px;
-    }
-    .video-description {
-      color: #333;
-      font-size: 1rem;
-      margin: 0 0 8px 0;
-      white-space: pre-line;
-    }
-    .comments-section {
-      background: var(--surface-container, #ece6f0);
-      border-radius: 18px;
-      padding: 12px 16px 8px 16px;
-      box-shadow: 0 2px 8px var(--shadow, rgba(103,80,164,0.08));
+      font-size: 0.97rem;
+      color: #767676;
+      display: flex;
+      gap: 14px;
+      align-items: center;
       margin-bottom: 12px;
     }
-    .comments-section h3 {
-      margin-top: 0;
-      font-size: 1.01rem;
-      font-weight: 600;
-      color: var(--primary, #6750a4);
+    .video-channel {
+      font-weight: 500;
+      color: #555;
+    }
+    .video-description {
+      font-size: 1rem;
+      color: #333;
+      line-height: 1.5;
+      max-height: 4.5em;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .video-description.expanded {
+      max-height: none;
+    }
+    .toggle-description {
+      color: var(--primary);
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .comments-section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0;
+      background: var(--surface-glass);
+      backdrop-filter: blur(7px);
+      border-top: 1.5px solid #e1e1e1;
+      overflow-y: auto;
+      transition: height 0.3s ease;
+      z-index: 200;
+    }
+    .comments-section.open {
+      height: 50vh;
+    }
+    .comments-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #ececec;
+    }
+    .comments-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #222;
+    }
+    .close-comments {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+    }
+    .comments-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .comment {
-      background: #f9f9f9;
-      border-radius: 12px;
-      margin: 8px 0;
-      padding: 8px 12px;
-      box-shadow: 0 1px 3px #0001;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
+      color: #333;
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
     }
-    .comment strong {
-      color: #625b71;
-      font-weight: 500;
-      font-size: 0.97rem;
-    }
-    .related-videos-col {
-      flex: 1;
-      min-width: 275px;
-      max-width: 350px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .related-videos-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--primary, #6750a4);
-      margin-bottom: 4px;
-      margin-top: 0;
-    }
-    .related-videos {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .video-card {
-      min-height: unset;
-      box-shadow: 0 2px 6px var(--shadow, rgba(103,80,164,0.08));
-    }
-    .video-card img {
-      height: 90px;
-      border-radius: 12px;
-    }
-    .video-card-content {
-      padding: 10px 10px 8px 10px;
-    }
-    .video-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--primary, #6750a4);
-      margin: 0 0 4px 0;
-    }
-    .video-meta {
-      font-size: 0.92rem;
-      color: #625b71;
-    }
+    /* Responsive */
     @media (max-width: 900px) {
-      .video-main {
-        flex-direction: column;
-        padding-top: 72px;
-        gap: 22px;
-      }
-      .related-videos-col {
-        max-width: 100%;
-        min-width: 0;
-      }
+      .ytc-header-content { flex-direction: column; align-items: stretch; gap: 12px; padding: 10px 8px;}
+      main.container { padding-top: 24px;}
     }
-    @media (max-width: 520px) {
-      .video-main, .container {
-        padding-left: 2px;
-        padding-right: 2px;
-      }
-      .video-frame {
-        border-radius: 8px;
-      }
-      .video-details, .comments-section {
-        border-radius: 8px;
-        padding: 8px 5px 6px 7px;
-      }
-      .related-videos-col {
-        gap: 10px;
-      }
-      .video-card img {
-        height: 60px;
-        border-radius: 7px;
-      }
-      .video-card-content {
-        padding: 6px 5px 6px 5px;
-      }
+    @media (max-width: 650px) {
+      main.container { padding-top: 16px;}
+      .ytc-header-content { gap: 8px;}
+      .ytc-search-btn { padding: 7px 12px;}
+      .ytc-brand { font-size: 1.07rem;}
+      .video-title { font-size: 1.2rem;}
+    }
+    @media (max-width: 400px) {
+      .ytc-brand { font-size: 0.93rem;}
+      .ytc-header-content { gap: 3px;}
+      .ytc-search-group { padding: 1.5px 2.5px;}
+      .ytc-search-btn { padding: 5px 7px; font-size: 0.92rem;}
+      .video-title { font-size: 1rem;}
     }
   </style>
 </head>
 <body>
+  <!-- Top App Bar with search -->
   <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
     <div class="mdc-top-app-bar__row">
-      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-        <a href="index.html" style="text-decoration:none;color:inherit;">
-          <span class="mdc-top-app-bar__title" style="letter-spacing:1px;font-weight:500;">YouTube Clone</span>
-        </a>
-      </section>
+      <div class="ytc-header-content">
+        <a href="index.html" class="ytc-brand">YouTube Clone</a>
+        <form class="ytc-search-group" id="ytc-search-form" autocomplete="off" onsubmit="return false;">
+          <input type="text" id="search-input" class="ytc-search-input" placeholder="Search videos" aria-label="Search videos">
+          <button type="submit" id="search-button" class="ytc-search-btn">
+            <span class="ytc-search-icon">🔍</span>
+            <span class="ytc-search-text">Search</span>
+          </button>
+        </form>
+      </div>
     </div>
   </header>
 
-  <main class="video-main">
-    <div class="main-video">
-      <iframe class="video-frame" id="player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      <div class="video-details">
-        <h1 class="video-title" id="video-title"></h1>
-        <p class="video-meta" id="video-meta"></p>
-        <div class="video-description" id="video-description"></div>
-      </div>
-      <div class="comments-section">
-        <h3>Comments</h3>
-        <div id="comments-container"></div>
-      </div>
+  <main class="container">
+    <div class="video-player-container">
+      <div id="player"></div>
     </div>
-    <div class="related-videos-col">
-      <div class="related-videos-title">Related Videos</div>
-      <div class="related-videos" id="related-videos"></div>
+    <div class="video-details">
+      <div class="video-title" id="video-title">Loading...</div>
+      <div class="video-meta">
+        <span class="video-channel" id="video-channel">Loading...</span>
+        <span id="video-views">0 views</span>
+        <span id="video-date">0 years ago</span>
+        <span id="video-likes">0 likes</span>
+        <span id="video-subscribers">0 subscribers</span>
+      </div>
+      <div class="video-description" id="video-description">Loading description...</div>
+      <span class="toggle-description" id="toggle-description">Show more</span>
     </div>
+    <button class="close-comments" id="toggle-comments" style="position: fixed; bottom: 16px; right: 16px; z-index: 201;">
+      Show Comments
+    </button>
+    <section class="comments-section" id="comments-section">
+      <div class="comments-header">
+        <div class="comments-title">Comments</div>
+        <button class="close-comments" id="close-comments">Close</button>
+      </div>
+      <div class="comments-list" id="comments-list"></div>
+    </section>
   </main>
 
-  <script src="js/watch.js"></script>
   <script>
+    // MDC auto init (for ripple, etc)
     mdc.autoInit && mdc.autoInit();
+
+    // Load Google API Client
+    function loadClient() {
+      gapi.client.setApiKey('YOUR_API_KEY'); // Ganti dengan API key Anda
+      return gapi.client.load('https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest')
+        .then(() => console.log('GAPI client loaded for API'),
+              err => console.error('Error loading GAPI client for API', err));
+    }
+
+    // YouTube IFrame API
+    let player;
+    function onYouTubeIframeAPIReady() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('videoId') || 'dQw4w9WgXcQ'; // Default video ID
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          'playsinline': 1,
+          'autoplay': 1
+        },
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      // Player siap
+    }
+
+    // Ambil detail video
+    function fetchVideoDetails(videoId) {
+      gapi.client.youtube.videos.list({
+        part: 'snippet,statistics',
+        id: videoId
+      }).then(response => {
+        const video = response.result.items[0];
+        // Ambil data subscriber channel
+        return gapi.client.youtube.channels.list({
+          part: 'statistics',
+          id: video.snippet.channelId
+        }).then(channelResponse => {
+          const channel = channelResponse.result.items[0];
+          renderVideoDetails(video, channel);
+        });
+      }).catch(err => console.error('Error fetching video details', err));
+    }
+
+    // Render detail video
+    function renderVideoDetails(video, channel) {
+      document.getElementById('video-title').textContent = video.snippet.title;
+      document.getElementById('video-channel').textContent = video.snippet.channelTitle;
+      document.getElementById('video-views').textContent = formatNumber(video.statistics.viewCount) + ' views';
+      document.getElementById('video-date').textContent = formatTimeAgo(video.snippet.publishedAt);
+      document.getElementById('video-likes').textContent = formatNumber(video.statistics.likeCount) + ' likes';
+      document.getElementById('video-subscribers').textContent = formatNumber(channel.statistics.subscriberCount) + ' subscribers';
+      document.getElementById('video-description').textContent = video.snippet.description || 'No description available';
+    }
+
+    // Ambil komentar
+    function fetchComments(videoId) {
+      gapi.client.youtube.commentThreads.list({
+        part: 'snippet',
+        videoId: videoId,
+        maxResults: 20
+      }).then(response => {
+        const comments = response.result.items;
+        renderComments(comments);
+      }).catch(err => console.error('Error fetching comments', err));
+    }
+
+    // Render komentar
+    function renderComments(comments) {
+      const commentsList = document.getElementById('comments-list');
+      commentsList.innerHTML = '';
+      comments.forEach(comment => {
+        const commentText = comment.snippet.topLevelComment.snippet.textDisplay;
+        const commentElement = `<div class="comment">${commentText}</div>`;
+        commentsList.innerHTML += commentElement;
+      });
+    }
+
+    // Toggle deskripsi
+    const description = document.getElementById('video-description');
+    const toggleBtn = document.getElementById('toggle-description');
+    toggleBtn.addEventListener('click', () => {
+      description.classList.toggle('expanded');
+      toggleBtn.textContent = description.classList.contains('expanded') ? 'Show less' : 'Show more';
+    });
+
+    // Toggle kolom komentar
+    const commentsSection = document.getElementById('comments-section');
+    const toggleCommentsBtn = document.getElementById('toggle-comments');
+    const closeCommentsBtn = document.getElementById('close-comments');
+    toggleCommentsBtn.addEventListener('click', () => {
+      commentsSection.classList.toggle('open');
+      toggleCommentsBtn.textContent = commentsSection.classList.contains('open') ? 'Hide Comments' : 'Show Comments';
+    });
+    closeCommentsBtn.addEventListener('click', () => {
+      commentsSection.classList.remove('open');
+      toggleCommentsBtn.textContent = 'Show Comments';
+    });
+
+    // Fungsi untuk format angka
+    function formatNumber(num) {
+      if (!num) return '0';
+      num = parseInt(num);
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toString();
+    }
+
+    // Fungsi untuk format waktu
+    function formatTimeAgo(dateString) {
+      const now = new Date();
+      const published = new Date(dateString);
+      const diff = Math.floor((now - published) / (1000 * 60 * 60 * 24));
+      if (diff >= 365) return Math.floor(diff / 365) + ' years ago';
+      if (diff >= 30) return Math.floor(diff / 30) + ' months ago';
+      if (diff >= 1) return diff + ' days ago';
+      return 'Today';
+    }
+
+    // Inisialisasi GAPI dan ambil data
+    gapi.load('client', () => {
+      loadClient().then(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('videoId') || 'dQw4w9WgXcQ';
+        fetchVideoDetails(videoId);
+        fetchComments(videoId);
+      });
+    });
   </script>
 </body>
 </html>
